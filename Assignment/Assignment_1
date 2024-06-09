@@ -1,0 +1,282 @@
+#include <iostream>
+using namespace std;
+#define MaxSalePersons 5
+
+struct EmployeeData
+{
+    int id = 0;
+    string FirstName = "N/A";
+    string LastName = "N/A";
+};
+
+struct Admin
+{
+    EmployeeData empAdmin;
+    string A_password = "admin123";
+};
+
+struct SalePerson
+{
+    EmployeeData data;
+    double SaleByQtr[4] = {0, 0, 0, 0};
+    double totalSale;
+    string S_password = "saleperson123";
+};
+// Function prototypes
+void displayMainMenu();
+void adminMenu(SalePerson salePersons[], int &numSalePersons);
+void salePersonMenu(SalePerson &salePerson);
+void displayRecords(SalePerson salePersons[], int numSalePersons);
+void displaySingleSalePersonRecord(SalePerson salePersons[], int numSalePersons, int id);
+
+int main()
+{
+    SalePerson salePersons[MaxSalePersons];
+    Admin admin;
+    int numSalePersons = 0;
+    int choice;
+    int id;
+    string password;
+    string admin_password;
+    cout << "Welcome to Sales Management System" << endl;
+
+    do
+    {
+        displayMainMenu();
+        cin >> choice;
+
+        switch (choice)
+        {
+        case 1: // Admin Login
+
+            cout << "Enter your FirstName: ";
+            cin >> admin.empAdmin.FirstName;
+            cout << "Enter your Last Name: ";
+            cin >> admin.empAdmin.LastName;
+
+            do
+            {
+                cout << "Enter the Password: ";
+                cin >> admin_password;
+
+                if (admin_password == "admin123")
+                {
+                    cout << "Reset new password: ";
+                    cin >> admin.A_password;
+                    cout << "Password updated successfully!" << endl;
+                }
+                else if (admin_password == admin.A_password)
+                {
+                    cout << "Login as Admin." << endl;
+                    adminMenu(salePersons, numSalePersons);
+                }
+                else
+                {
+                    cout << "Invalid password. Access denied." << endl;
+                }
+
+            } while (admin_password != admin.A_password);
+
+            break;
+        case 2: // SalePerson Login
+            if (numSalePersons == 0)
+            {
+                cout << "No SalePersons enrolled yet. Please ask the admin to enroll SalePersons." << endl;
+            }
+            else
+            {
+                cout << "Enter your ID: ";
+                cin >> id;
+                cout << "Enter your password: ";
+                cin >> password;
+
+                for (int i = 0; i < numSalePersons; ++i)
+                {
+                    if (salePersons[i].data.id == id && salePersons[i].S_password == password)
+                    {
+                        salePersonMenu(salePersons[i]);
+                    }
+                }
+
+                cout << "Invalid ID or password. Access denied." << endl;
+            }
+            break;
+        case 3:
+            cout << "Thanks for using the Program!" << endl;
+            break;
+        default:
+            cout << "Invalid choice. Please try again." << endl;
+        }
+    } while (choice != 3);
+}
+
+void displayMainMenu()
+{
+    cout << "Main Menu:" << endl;
+    cout << "1. Login as Admin" << endl;
+    cout << "2. Login as SalePerson" << endl;
+    cout << "3. Quit" << endl;
+    cout << "Enter your choice: ";
+}
+
+void adminMenu(SalePerson salePersons[], int &numSalePersons)
+{
+    int adminChoice;
+
+    do
+    {
+        cout << "Admin Menu:" << endl;
+        cout << "1. Display complete records" << endl;
+        cout << "2. Display single saleperson record" << endl;
+        cout << "3. Add/enroll a saleperson" << endl;
+        cout << "4. Logout from Admin" << endl;
+        cout << "Enter your choice: ";
+        cin >> adminChoice;
+
+        switch (adminChoice)
+        {
+        case 1:
+            displayRecords(salePersons, numSalePersons);
+            break;
+        case 2:
+            int id;
+            cout << "Enter SalePerson ID: ";
+            cin >> id;
+            displaySingleSalePersonRecord(salePersons, numSalePersons, id);
+            break;
+        case 3:
+            if (numSalePersons < MaxSalePersons)
+            {
+                SalePerson newSalePerson;
+                cout << "Enter SalePerson ID: ";
+                cin >> newSalePerson.data.id;
+                cout << "Enter first name: ";
+                cin >> newSalePerson.data.FirstName;
+                cout << "Enter last name: ";
+                cin >> newSalePerson.data.LastName;
+                cout << "Set a password: ";
+                cin >> newSalePerson.S_password;
+
+                for (int i = 0; i < 4; ++i)
+                {
+                    newSalePerson.SaleByQtr[i] = 0;
+                }
+                newSalePerson.totalSale = 0;
+                salePersons[numSalePersons++] = newSalePerson;
+                cout << "SalePerson added successfully." << endl;
+            }
+            else
+            {
+                cout << "Maximum SalePersons reached. Cannot add more." << endl;
+            }
+            break;
+        case 4:
+            cout << "Logged out from Admin account." << endl;
+            break;
+        default:
+            cout << "Invalid choice. Please try again." << endl;
+        }
+    } while (adminChoice != 4);
+}
+
+void salePersonMenu(SalePerson &salePerson)
+{
+    int salePersonChoice;
+
+    do
+    {
+        cout << "SalePerson Menu:" << endl;
+        cout << "1. Update salesByQtr" << endl;
+        cout << "2. View your sales record" << endl;
+        cout << "3. Logout from SalePerson Account" << endl;
+        cout << "Enter your choice: ";
+        cin >> salePersonChoice;
+
+        switch (salePersonChoice)
+        {
+        case 1:
+            cout << "Enter sales for quarter:" << endl;
+            for (int i = 0; i < 4; ++i)
+            {
+                cout << "Quarter " << (i + 1) << ": ";
+                cin >> salePerson.SaleByQtr[i];
+            }
+
+            salePerson.totalSale = 0;
+            for (int i = 0; i < 4; ++i)
+            {
+                salePerson.totalSale += salePerson.SaleByQtr[i];
+            }
+            cout << "Sales updated successfully." << endl;
+            break;
+        case 2:
+            cout << "-------------------------------" << endl;
+            cout << "Sales Record for SalePerson :" << salePerson.data.id << endl;
+            cout << "First Name: " << salePerson.data.FirstName << endl;
+            cout << "Last Name: " << salePerson.data.LastName << endl;
+            cout << "Total Sale: " << salePerson.totalSale << endl;
+            cout << "-------------------------------" << endl;
+            break;
+        case 3:
+            cout << "Logged out from SalePerson account." << endl;
+            break;
+        default:
+            cout << "Invalid choice. Please try again." << endl;
+        }
+    } while (salePersonChoice != 3);
+}
+
+void displayRecords(SalePerson salePersons[], int numSalePersons) // Dispaly All record
+{
+    int maxsale = 0;
+    int id = 0;
+    cout << "Sales Records for all SalePersons:" << endl;
+    cout << "\t QTR 1\t  QTR 2\t QTR 3\t QTR 4\t Total\t" << endl;
+
+    for (int i = 0; i < MaxSalePersons; i++)
+    {
+
+        if (salePersons[i].data.id != 0)
+        {
+            cout << "ID: " << salePersons[i].data.id;
+            for (int j = 0; j < 4; j++)
+            {
+
+                cout << " \t  " << salePersons[i].SaleByQtr[j];
+            }
+            cout << " \t " << salePersons[i].totalSale << endl;
+        }
+    }
+    cout << "----------------------------------------------" << endl;
+
+    for (int i = 0; i < numSalePersons; i++)
+    {
+        if (salePersons[i].totalSale > maxsale)
+        {
+            maxsale = salePersons[i].totalSale;
+            id = salePersons[i].data.id;
+        }
+    }
+    cout << "Max sale by saleperson : " << id << endl;
+    cout << "Amount : $ " << maxsale << endl;
+}
+
+void displaySingleSalePersonRecord(SalePerson salePersons[], int numSalePersons, int id)
+{
+    for (int i = 0; i < numSalePersons; ++i)
+    {
+        if (salePersons[i].data.id == id)
+        {
+            cout << "--------------------------------" << endl;
+            cout << "Sales Record for SalePerson :" << salePersons[i].data.id << endl;
+            cout << "First Name: " << salePersons[i].data.FirstName << endl;
+            cout << "Last Name: " << salePersons[i].data.LastName << endl;
+            cout << "Total Sale:" << salePersons[i].totalSale << endl;
+            cout << "--------------------------------" << endl;
+        }
+        else
+        {
+            cout << "SalePerson with ID " << id << " not found." << endl;
+        }
+    }
+}
